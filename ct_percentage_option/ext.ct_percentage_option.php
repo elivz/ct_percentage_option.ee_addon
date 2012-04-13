@@ -47,7 +47,7 @@ class Ct_percentage_option_ext
      * update_extension
      * 
      * @access    public
-     * @param    mixed $current = ''
+     * @param     mixed $current = ''
      * @return    void
      */
     public function update_extension($current = '')
@@ -83,9 +83,25 @@ class Ct_percentage_option_ext
         return $settings;
     }
     
-    public function on_add_to_cart_end()
+    public function on_add_to_cart_end($item)
     {
-        //var_dump($this->EE->cartthrob->cart->order());
+        $price = $item->price();
+        $item_options = $this->EE->input->post('item_options', TRUE);
+        if (!is_array($item_options)) return;
+        
+        foreach ($item_options as $name => $value)
+        {
+            if (substr($name, -3) == 'pct')
+            {
+                $pct = intval(preg_replace('/[^0-9]+/', '', $value)) / 100;
+                if (is_numeric($pct))
+                {
+                    $price = $price + ($price * $pct);
+                }
+            }
+        }
+        
+        $item->set_price($price);
     }
 }
 
